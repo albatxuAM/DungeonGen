@@ -755,7 +755,7 @@ PlayerSettings:
   cloudProjectId: 77993f85-588e-4064-ae66-9d9f7608922a
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Dungeon Generator 3D
+  projectName: DungeonGenerator
   organizationId: unity_37dca5c8144483592deb
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

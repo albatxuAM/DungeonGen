@@ -36,6 +36,8 @@ public class Generator2D : MonoBehaviour
     [SerializeField]
     Vector2Int roomMaxSize;
     [SerializeField]
+    Vector2Int roomMinSize;
+    [SerializeField]
     GameObject cubePrefab;
     [SerializeField]
     Material redMaterial;
@@ -76,6 +78,52 @@ public class Generator2D : MonoBehaviour
         PathfindHallways();
     }
 
+    //void PlaceRooms()
+    //{
+    //    for (int i = 0; i < roomCount; i++)
+    //    {
+    //        Vector2Int location = new Vector2Int(
+    //            random.Next(0, size.x),
+    //            random.Next(0, size.y)
+    //        );
+
+    //        Vector2Int roomSize = new Vector2Int(
+    //            random.Next(1, roomMaxSize.x + 1),
+    //            random.Next(1, roomMaxSize.y + 1)
+    //        );
+
+    //        bool add = true;
+    //        Room newRoom = new Room(location, roomSize);
+    //        Room buffer = new Room(location + new Vector2Int(-1, -1), roomSize + new Vector2Int(2, 2));
+
+    //        foreach (var room in rooms)
+    //        {
+    //            if (Room.Intersect(room, buffer))
+    //            {
+    //                add = false;
+    //                break;
+    //            }
+    //        }
+
+    //        if (newRoom.bounds.xMin < 0 || newRoom.bounds.xMax >= size.x
+    //            || newRoom.bounds.yMin < 0 || newRoom.bounds.yMax >= size.y)
+    //        {
+    //            add = false;
+    //        }
+
+    //        if (add)
+    //        {
+    //            rooms.Add(newRoom);
+    //            PlaceRoom(newRoom.bounds.position, newRoom.bounds.size);
+
+    //            foreach (var pos in newRoom.bounds.allPositionsWithin)
+    //            {
+    //                grid[pos] = CellType.Room;
+    //            }
+    //        }
+    //    }
+    //}
+
     void PlaceRooms()
     {
         for (int i = 0; i < roomCount; i++)
@@ -86,8 +134,8 @@ public class Generator2D : MonoBehaviour
             );
 
             Vector2Int roomSize = new Vector2Int(
-                random.Next(1, roomMaxSize.x + 1),
-                random.Next(1, roomMaxSize.y + 1)
+                random.Next(roomMinSize.x, roomMaxSize.x + 1),
+                random.Next(roomMinSize.y, roomMaxSize.y + 1)
             );
 
             bool add = true;

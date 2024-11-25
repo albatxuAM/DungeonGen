@@ -158,6 +158,7 @@ MonoBehaviour:
   cubePrefab: {fileID: 7415050535990569633, guid: 3fb4ddafbd160274ba8f07a1cf8cd5ee, type: 3}
   redMaterial: {fileID: 2100000, guid: 71673d9873285904ab00282788add27f, type: 2}
   blueMaterial: {fileID: 2100000, guid: bd79999920190574a94044b2acad7316, type: 2}
+  ramdomSeed: 0
   floorTilePrefab: {fileID: 9100508158649072905, guid: e348e7143b6247b488737e4be26fb038, type: 3}
   wallPrefab: {fileID: 6229247520373792897, guid: 3ad7a1cffb2556547a8b7e60fd320431, type: 3}
   doorPrefab: {fileID: 4463566038210007903, guid: 49a5f24a081cbbc44bd23d76c2869723, type: 3}
@@ -214,6 +215,7 @@ MonoBehaviour:
   cubePrefab: {fileID: 7415050535990569633, guid: 3fb4ddafbd160274ba8f07a1cf8cd5ee, type: 3}
   redMaterial: {fileID: 2100000, guid: 71673d9873285904ab00282788add27f, type: 2}
   blueMaterial: {fileID: 2100000, guid: bd79999920190574a94044b2acad7316, type: 2}
+  ramdomSeed: 0
 --- !u!4 &655227961
 Transform:
   m_ObjectHideFlags: 0

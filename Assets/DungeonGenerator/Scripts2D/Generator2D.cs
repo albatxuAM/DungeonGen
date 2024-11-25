@@ -44,6 +44,9 @@ public class Generator2D : MonoBehaviour
     [SerializeField]
     Material blueMaterial;
 
+    [SerializeField]
+    int ramdomSeed;
+
     Random random;
     Grid2D<CellType> grid;
     List<Room> rooms;
@@ -68,7 +71,7 @@ public class Generator2D : MonoBehaviour
 
     void Generate()
     {
-        random = new Random(0);
+        random = new Random(ramdomSeed);
         grid = new Grid2D<CellType>(size, Vector2Int.zero);
         rooms = new List<Room>();
 

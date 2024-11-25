@@ -9,6 +9,7 @@ public class GeneratorCube2D : MonoBehaviour
     {
         None,
         Room,
+        Door,
         Hallway
     }
 
@@ -43,6 +44,8 @@ public class GeneratorCube2D : MonoBehaviour
     Material redMaterial;
     [SerializeField]
     Material blueMaterial;
+    [SerializeField]
+    Material greenMaterial;
 
     [SerializeField]
     int ramdomSeed;
@@ -67,7 +70,15 @@ public class GeneratorCube2D : MonoBehaviour
         PlaceRooms();
         Triangulate();
         CreateHallways();
+
+        grid.Print();
+
         PathfindHallways();
+
+        grid.Print();
+
+        //PlaceDoors();
+        //grid.Print();
     }
 
     void PlaceRooms()
@@ -209,15 +220,106 @@ public class GeneratorCube2D : MonoBehaviour
                     }
                 }
 
-                foreach (var pos in path)
+                //foreach (var pos in path)
+                //{
+                //    if (grid[pos] == CellType.Hallway)
+                //    {
+                //        PlaceHallway(pos);
+                //    }
+                //}
+
+                for (int i = 0; i < path.Count - 1; i++)
                 {
-                    if (grid[pos] == CellType.Hallway)
+                    var curr = path[i];
+                    var next = path[i + 1];
+
+                    if (grid[curr] == CellType.Hallway)
                     {
-                        PlaceHallway(pos);
+                        PlaceHallway(curr);
+                    }
+
+                    // Verificar si la posición actual es una sala y la siguiente es un pasillo
+                    if (grid[curr] == CellType.Room && grid[next] == CellType.Hallway)
+                    {
+                        // Verificar que la ubicación anterior no es una puerta antes de colocarla
+                        // if (grid[next] != CellType.Door)
+                        {
+                            PlaceDoor(curr);
+                            grid[curr] = CellType.Door;  // Asignar 'Door' en la posición donde se coloca la puerta
+                        }
+                    }
+                    else if (grid[next] == CellType.Room && grid[curr] == CellType.Hallway)
+                    {
+                        // Verificar que la ubicación anterior no es una puerta antes de colocarla
+                        // if (grid[next] != CellType.Door)
+                        {
+                            PlaceDoor(next);
+                            grid[next] = CellType.Door;  // Asignar 'Door' en la posición donde se coloca la puerta
+                        }
                     }
                 }
             }
         }
+    }
+
+    private void PlaceDoors()
+    {
+        // Recorrer el grid completo
+        for (int y = 0; y < size.y; y++)
+        {
+            for (int x = 0; x < size.x; x++)
+            {
+                Vector2Int currentPos = new Vector2Int(x, y);
+
+                // Verificar si la celda actual es un pasillo
+                if (grid[currentPos] == CellType.Hallway)
+                {
+                    // Verificar si algún vecino es una habitación
+                    foreach (var neighbor in GetNeighbors(currentPos))
+                    {
+                        // Si el vecino es una habitación, colocar una puerta en la posición actual
+                        if (grid[neighbor] == CellType.Room)
+                        {
+                            PlaceDoor(currentPos);
+                            grid[currentPos] = CellType.Door;
+                            break; // Solo colocar una puerta una vez por pasillo
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private List<Vector2Int> GetNeighbors(Vector2Int pos)
+    {
+        List<Vector2Int> neighbors = new List<Vector2Int>();
+
+        // Definir las posiciones de los vecinos (arriba, abajo, izquierda, derecha)
+        Vector2Int[] directions = new Vector2Int[]
+        {
+        new Vector2Int(0, 1),  // Arriba
+        new Vector2Int(0, -1), // Abajo
+        new Vector2Int(1, 0),  // Derecha
+        new Vector2Int(-1, 0)  // Izquierda
+        };
+
+        // Comprobar los vecinos en las direcciones definidas
+        foreach (var direction in directions)
+        {
+            Vector2Int neighbor = pos + direction;
+            if (InBounds(neighbor))
+            {
+                neighbors.Add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+    private bool InBounds(Vector2Int pos)
+    {
+        // Verifica si la posición está dentro de los límites del grid
+        return pos.x >= 0 && pos.x < size.x && pos.y >= 0 && pos.y < size.y;
     }
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
@@ -235,5 +337,10 @@ public class GeneratorCube2D : MonoBehaviour
     void PlaceHallway(Vector2Int location)
     {
         PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
+    }
+
+    void PlaceDoor(Vector2Int location)
+    {
+        PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
     }
 }

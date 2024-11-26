@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Graphs;
 using UnityEngine;
 using Random = System.Random;
@@ -28,6 +28,9 @@ public class Generator2D : MonoBehaviour
                 || (a.bounds.position.y >= (b.bounds.position.y + b.bounds.size.y)) || ((a.bounds.position.y + a.bounds.size.y) <= b.bounds.position.y));
         }
     }
+
+    [SerializeField]
+    bool debug = true;
 
     [SerializeField]
     Vector2Int size;
@@ -346,6 +349,7 @@ public class Generator2D : MonoBehaviour
                 }
                 else if (grid[pos] == CellType.Door)
                 {
+                    Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity);
                     PlaceDoorWithOrientation(pos);
                 }
             }
@@ -357,7 +361,9 @@ public class Generator2D : MonoBehaviour
             for (int x = 0; x < size.x; x++)
             {
                 Vector2Int pos = new Vector2Int(x, y);
-                PlaceWalls(pos);
+                //PlaceWalls(pos);
+                // Colocar pilares después de las paredes
+                PlacePillars(pos);
             }
         }
 
@@ -370,16 +376,6 @@ public class Generator2D : MonoBehaviour
         //        PlaceHallwayWalls(pos);
         //    }
         //}
-
-        // Colocar pilares después de las paredes
-        for (int y = 0; y < size.y; y++)
-        {
-            for (int x = 0; x < size.x; x++)
-            {
-                Vector2Int pos = new Vector2Int(x, y);
-                PlacePillars(pos);
-            }
-        }
     }
 
     void PlaceDoorWithOrientation(Vector2Int pos)
@@ -404,11 +400,11 @@ public class Generator2D : MonoBehaviour
         if (roomNeighbor.HasValue && hallwayNeighbor.HasValue)
         {
             // Calcula la dirección hacia la habitación
-            Vector3 direction = new Vector3(roomNeighbor.Value.x - pos.x, 0, roomNeighbor.Value.y - pos.y);
+            Vector3 direction = new Vector3(hallwayNeighbor.Value.x - pos.x, 0, hallwayNeighbor.Value.y - pos.y);
             Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-            // Ajusta la rotación si están invertidas (-90 grados)
-            rotation *= Quaternion.Euler(0, -90, 0); // Aplica una corrección manual para alinear la puerta.
+            // Ajusta la rotación si están invertidas (-180 grados)
+            //rotation *= Quaternion.Euler(0, -180, 0);
 
             // Ajusta la posición de la puerta para que esté en el borde
             Vector3 doorPosition = new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f);
@@ -450,7 +446,7 @@ public class Generator2D : MonoBehaviour
                         Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
                         Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-                        Instantiate(wallPrefab, new Vector3(pos.x, 0, pos.y), rotation);
+                        Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation);
                         break;
                     }
                 }
@@ -490,11 +486,48 @@ public class Generator2D : MonoBehaviour
             }
 
             // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
-            if (adjacentCount >= 2 && IsCorner(pos))
+            if (adjacentCount >= 2)
+            {
+
+                Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+            }
+        }
+
+        if (grid[pos] == CellType.Room)
+        {
+            int adjacentCount = 0;
+
+            foreach (var neighbor in GetNeighbors(pos))
+            {
+                if (grid[neighbor] != CellType.None)
+                {
+                    adjacentCount++;
+                }
+            }
+            // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
+            if (adjacentCount <= 2)
             {
                 Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
             }
         }
+
+        //if (grid[pos] == CellType.Hallway)
+        //{
+        //    int adjacentCount = 0;
+
+        //    foreach (var neighbor in GetNeighbors(pos))
+        //    {
+        //        if (grid[neighbor] != CellType.None)
+        //        {
+        //            adjacentCount++;
+        //        }
+        //    }
+        //    // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
+        //    if (adjacentCount == 2)
+        //    {
+        //        Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+        //    }
+        //}
     }
 
     bool IsCorner(Vector2Int pos)
@@ -517,9 +550,12 @@ public class Generator2D : MonoBehaviour
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
     {
-        GameObject go = Instantiate(cubePrefab, new Vector3(location.x, 0, location.y), Quaternion.identity);
-        go.GetComponent<Transform>().localScale = new Vector3(size.x, 1, size.y);
-        go.GetComponent<MeshRenderer>().material = material;
+        if (debug)
+        {
+            GameObject go = Instantiate(cubePrefab, new Vector3(location.x - 0.5f, 0, location.y - 0.5f), Quaternion.identity);
+            go.GetComponent<Transform>().localScale = new Vector3(size.x, 1, size.y);
+            go.GetComponent<MeshRenderer>().material = material;
+        }
     }
 
     void PlaceRoom(Vector2Int location, Vector2Int size)

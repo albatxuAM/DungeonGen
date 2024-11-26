@@ -3,14 +3,14 @@ using Graphs;
 using UnityEngine;
 using Random = System.Random;
 
-public class Generator2D_1 : MonoBehaviour
+public class Generator2D : MonoBehaviour
 {
     enum CellType
     {
-        None = 0,
-        Room = 1,
-        Door = 2,
-        Hallway = 3
+        None,
+        Room,
+        Door,
+        Hallway
     }
 
     class Room
@@ -37,12 +37,15 @@ public class Generator2D_1 : MonoBehaviour
     Vector2Int roomMaxSize;
     [SerializeField]
     Vector2Int roomMinSize;
+
     [SerializeField]
     GameObject cubePrefab;
     [SerializeField]
     Material redMaterial;
     [SerializeField]
     Material blueMaterial;
+    [SerializeField]
+    Material greenMaterial;
 
     [SerializeField]
     int ramdomSeed;
@@ -78,54 +81,15 @@ public class Generator2D_1 : MonoBehaviour
         PlaceRooms();
         Triangulate();
         CreateHallways();
+
+        grid.Print();
+
         PathfindHallways();
+
+        grid.Print();
+
+        BuildLevel();
     }
-
-    //void PlaceRooms()
-    //{
-    //    for (int i = 0; i < roomCount; i++)
-    //    {
-    //        Vector2Int location = new Vector2Int(
-    //            random.Next(0, size.x),
-    //            random.Next(0, size.y)
-    //        );
-
-    //        Vector2Int roomSize = new Vector2Int(
-    //            random.Next(1, roomMaxSize.x + 1),
-    //            random.Next(1, roomMaxSize.y + 1)
-    //        );
-
-    //        bool add = true;
-    //        Room newRoom = new Room(location, roomSize);
-    //        Room buffer = new Room(location + new Vector2Int(-1, -1), roomSize + new Vector2Int(2, 2));
-
-    //        foreach (var room in rooms)
-    //        {
-    //            if (Room.Intersect(room, buffer))
-    //            {
-    //                add = false;
-    //                break;
-    //            }
-    //        }
-
-    //        if (newRoom.bounds.xMin < 0 || newRoom.bounds.xMax >= size.x
-    //            || newRoom.bounds.yMin < 0 || newRoom.bounds.yMax >= size.y)
-    //        {
-    //            add = false;
-    //        }
-
-    //        if (add)
-    //        {
-    //            rooms.Add(newRoom);
-    //            PlaceRoom(newRoom.bounds.position, newRoom.bounds.size);
-
-    //            foreach (var pos in newRoom.bounds.allPositionsWithin)
-    //            {
-    //                grid[pos] = CellType.Room;
-    //            }
-    //        }
-    //    }
-    //}
 
     void PlaceRooms()
     {
@@ -209,74 +173,6 @@ public class Generator2D_1 : MonoBehaviour
         }
     }
 
-    //void PathfindHallways()
-    //{
-    //    DungeonPathfinder2D aStar = new DungeonPathfinder2D(size);
-
-    //    foreach (var edge in selectedEdges)
-    //    {
-    //        var startRoom = (edge.U as Vertex<Room>).Item;
-    //        var endRoom = (edge.V as Vertex<Room>).Item;
-
-    //        var startPosf = startRoom.bounds.center;
-    //        var endPosf = endRoom.bounds.center;
-    //        var startPos = new Vector2Int((int)startPosf.x, (int)startPosf.y);
-    //        var endPos = new Vector2Int((int)endPosf.x, (int)endPosf.y);
-
-    //        var path = aStar.FindPath(startPos, endPos, (DungeonPathfinder2D.Node a, DungeonPathfinder2D.Node b) =>
-    //        {
-    //            var pathCost = new DungeonPathfinder2D.PathCost();
-
-    //            pathCost.cost = Vector2Int.Distance(b.Position, endPos);    //heuristic
-
-    //            if (grid[b.Position] == CellType.Room)
-    //            {
-    //                pathCost.cost += 10;
-    //            }
-    //            else if (grid[b.Position] == CellType.None)
-    //            {
-    //                pathCost.cost += 5;
-    //            }
-    //            else if (grid[b.Position] == CellType.Hallway)
-    //            {
-    //                pathCost.cost += 1;
-    //            }
-
-    //            pathCost.traversable = true;
-
-    //            return pathCost;
-    //        });
-
-    //        if (path != null)
-    //        {
-    //            for (int i = 0; i < path.Count; i++)
-    //            {
-    //                var current = path[i];
-
-    //                if (grid[current] == CellType.None)
-    //                {
-    //                    grid[current] = CellType.Hallway;
-    //                }
-
-    //                if (i > 0)
-    //                {
-    //                    var prev = path[i - 1];
-
-    //                    var delta = current - prev;
-    //                }
-    //            }
-
-    //            foreach (var pos in path)
-    //            {
-    //                if (grid[pos] == CellType.Hallway)
-    //                {
-    //                    PlaceHallway(pos);
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     void PathfindHallways()
     {
         DungeonPathfinder2D aStar = new DungeonPathfinder2D(size);
@@ -295,8 +191,7 @@ public class Generator2D_1 : MonoBehaviour
             {
                 var pathCost = new DungeonPathfinder2D.PathCost();
 
-                // Heurística de costo: favorecer pasillos y evitar habitaciones.
-                pathCost.cost = Vector2Int.Distance(b.Position, endPos);
+                pathCost.cost = Vector2Int.Distance(b.Position, endPos);    //heuristic
 
                 if (grid[b.Position] == CellType.Room)
                 {
@@ -318,36 +213,306 @@ public class Generator2D_1 : MonoBehaviour
 
             if (path != null)
             {
-                foreach (var pos in path)
+                for (int i = 0; i < path.Count; i++)
                 {
-                    if (grid[pos] == CellType.None)
+                    var current = path[i];
+
+                    if (grid[current] == CellType.None)
                     {
-                        grid[pos] = CellType.Hallway;
-                        PlaceHallway(pos);
+                        grid[current] = CellType.Hallway;
+                    }
+
+                    if (i > 0)
+                    {
+                        var prev = path[i - 1];
+
+                        var delta = current - prev;
+                    }
+                }
+
+                //foreach (var pos in path)
+                //{
+                //    if (grid[pos] == CellType.Hallway)
+                //    {
+                //        PlaceHallway(pos);
+                //    }
+                //}
+
+                for (int i = 0; i < path.Count - 1; i++)
+                {
+                    var curr = path[i];
+                    var next = path[i + 1];
+
+                    if (grid[curr] == CellType.Hallway)
+                    {
+                        PlaceHallway(curr);
+                    }
+
+                    // Verificar si la posición actual es una sala y la siguiente es un pasillo
+                    if (grid[curr] == CellType.Room && grid[next] == CellType.Hallway)
+                    {
+                        // Verificar que la ubicación anterior no es una puerta antes de colocarla
+                        // if (grid[next] != CellType.Door)
+                        {
+                            PlaceDoor(curr);
+                            grid[curr] = CellType.Door;  // Asignar 'Door' en la posición donde se coloca la puerta
+                        }
+                    }
+                    else if (grid[next] == CellType.Room && grid[curr] == CellType.Hallway)
+                    {
+                        // Verificar que la ubicación anterior no es una puerta antes de colocarla
+                        // if (grid[next] != CellType.Door)
+                        {
+                            PlaceDoor(next);
+                            grid[next] = CellType.Door;  // Asignar 'Door' en la posición donde se coloca la puerta
+                        }
                     }
                 }
             }
         }
     }
 
-    void TryPlaceDoor(Vector2Int position, Vector2Int direction)
+    private void PlaceDoors()
     {
-        Vector2Int adjacentPos = position + direction;
-
-        // Solo coloca una puerta si hay una transición válida.
-        if (grid[position] == CellType.Room && grid[adjacentPos] == CellType.Hallway)
+        // Recorrer el grid completo
+        for (int y = 0; y < size.y; y++)
         {
-            Vector3 doorPosition = new Vector3(position.x + direction.x * 0.5f, 0, position.y + direction.y * 0.5f);
+            for (int x = 0; x < size.x; x++)
+            {
+                Vector2Int currentPos = new Vector2Int(x, y);
 
-            // Determina si la puerta es vertical u horizontal.
-            bool isVertical = direction.x != 0;
-
-            // Coloca la puerta
-            PlaceDoor(doorPosition, isVertical);
-
-            // Marca en el grid que aquí hay una puerta, opcional
-            grid[position] = CellType.Door; // Si decides agregar un tipo de celda "Door"
+                // Verificar si la celda actual es un pasillo
+                if (grid[currentPos] == CellType.Hallway)
+                {
+                    // Verificar si algún vecino es una habitación
+                    foreach (var neighbor in GetNeighbors(currentPos))
+                    {
+                        // Si el vecino es una habitación, colocar una puerta en la posición actual
+                        if (grid[neighbor] == CellType.Room)
+                        {
+                            PlaceDoor(currentPos);
+                            grid[currentPos] = CellType.Door;
+                            break; // Solo colocar una puerta una vez por pasillo
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private List<Vector2Int> GetNeighbors(Vector2Int pos)
+    {
+        List<Vector2Int> neighbors = new List<Vector2Int>();
+
+        // Definir las posiciones de los vecinos (arriba, abajo, izquierda, derecha)
+        Vector2Int[] directions = new Vector2Int[]
+        {
+        new Vector2Int(0, 1),  // Arriba
+        new Vector2Int(0, -1), // Abajo
+        new Vector2Int(1, 0),  // Derecha
+        new Vector2Int(-1, 0)  // Izquierda
+        };
+
+        // Comprobar los vecinos en las direcciones definidas
+        foreach (var direction in directions)
+        {
+            Vector2Int neighbor = pos + direction;
+            if (InBounds(neighbor))
+            {
+                neighbors.Add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+    private bool InBounds(Vector2Int pos)
+    {
+        // Verifica si la posición está dentro de los límites del grid
+        return pos.x >= 0 && pos.x < size.x && pos.y >= 0 && pos.y < size.y;
+    }
+
+    void BuildLevel()
+    {
+        for (int y = 0; y < size.y; y++)
+        {
+            for (int x = 0; x < size.x; x++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+
+                if (grid[pos] == CellType.Room || grid[pos] == CellType.Hallway)
+                {
+                    Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity);
+                }
+                else if (grid[pos] == CellType.Door)
+                {
+                    PlaceDoorWithOrientation(pos);
+                }
+            }
+        }
+
+        // Colocar paredes en un segundo paso
+        for (int y = 0; y < size.y; y++)
+        {
+            for (int x = 0; x < size.x; x++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                PlaceWalls(pos);
+            }
+        }
+
+        // Colocar paredes para los pasillos
+        //for (int y = 0; y < size.y; y++)
+        //{
+        //    for (int x = 0; x < size.x; x++)
+        //    {
+        //        Vector2Int pos = new Vector2Int(x, y);
+        //        PlaceHallwayWalls(pos);
+        //    }
+        //}
+
+        // Colocar pilares después de las paredes
+        for (int y = 0; y < size.y; y++)
+        {
+            for (int x = 0; x < size.x; x++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                PlacePillars(pos);
+            }
+        }
+    }
+
+    void PlaceDoorWithOrientation(Vector2Int pos)
+    {
+        Vector2Int? roomNeighbor = null;
+        Vector2Int? hallwayNeighbor = null;
+
+        // Buscar vecinos Room y Hallway
+        foreach (var neighbor in GetNeighbors(pos))
+        {
+            if (grid[neighbor] == CellType.Room)
+            {
+                roomNeighbor = neighbor;
+            }
+            else if (grid[neighbor] == CellType.Hallway)
+            {
+                hallwayNeighbor = neighbor;
+            }
+        }
+
+        // Verifica si hay conexión válida entre Room y Hallway
+        if (roomNeighbor.HasValue && hallwayNeighbor.HasValue)
+        {
+            // Calcula la dirección hacia la habitación
+            Vector3 direction = new Vector3(roomNeighbor.Value.x - pos.x, 0, roomNeighbor.Value.y - pos.y);
+            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+            // Ajusta la rotación si están invertidas (-90 grados)
+            rotation *= Quaternion.Euler(0, -90, 0); // Aplica una corrección manual para alinear la puerta.
+
+            // Ajusta la posición de la puerta para que esté en el borde
+            Vector3 doorPosition = new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f);
+
+            // Instancia la puerta
+            Instantiate(doorPrefab, doorPosition, rotation);
+        }
+        else
+        {
+            // Si no hay una conexión válida, coloca la puerta sin rotación como fallback
+            Instantiate(doorPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+        }
+    }
+
+
+    void PlaceWalls(Vector2Int pos)
+    {
+        if (grid[pos] == CellType.None)
+        {
+            // Coloca una pared si la celda vacía está adyacente a una habitación o pasillo
+            bool adjacentToContent = false;
+
+            foreach (var neighbor in GetNeighbors(pos))
+            {
+                if (grid[neighbor] == CellType.Room || grid[neighbor] == CellType.Hallway)
+                {
+                    adjacentToContent = true;
+                    break;
+                }
+            }
+
+            if (adjacentToContent)
+            {
+                // Coloca la pared orientada hacia la celda ocupada más cercana
+                foreach (var neighbor in GetNeighbors(pos))
+                {
+                    if (grid[neighbor] != CellType.None)
+                    {
+                        Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
+                        Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                        Instantiate(wallPrefab, new Vector3(pos.x, 0, pos.y), rotation);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    void PlaceHallwayWalls(Vector2Int pos)
+    {
+        if (grid[pos] == CellType.Hallway)
+        {
+            foreach (var neighbor in GetNeighbors(pos))
+            {
+                if (grid[neighbor] == CellType.None)
+                {
+                    // Coloca una pared en celdas vacías adyacentes al pasillo
+                    Vector3 direction = new Vector3(pos.x - neighbor.x, 0, pos.y - neighbor.y);
+                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                    Instantiate(wallPrefab, new Vector3(neighbor.x, 0, neighbor.y), rotation);
+                }
+            }
+        }
+    }
+
+    void PlacePillars(Vector2Int pos)
+    {
+        if (grid[pos] == CellType.None)
+        {
+            int adjacentCount = 0;
+
+            foreach (var neighbor in GetNeighbors(pos))
+            {
+                if (grid[neighbor] != CellType.None)
+                {
+                    adjacentCount++;
+                }
+            }
+
+            // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
+            if (adjacentCount >= 2 && IsCorner(pos))
+            {
+                Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+            }
+        }
+    }
+
+    bool IsCorner(Vector2Int pos)
+    {
+        // Identificar si la posición actual está en una esquina
+        List<Vector2Int> neighbors = GetNeighbors(pos);
+        int horizontal = 0, vertical = 0;
+
+        foreach (var neighbor in neighbors)
+        {
+            if (grid[neighbor] != CellType.None)
+            {
+                if (neighbor.x != pos.x) horizontal++;
+                if (neighbor.y != pos.y) vertical++;
+            }
+        }
+
+        return horizontal > 0 && vertical > 0; // Esquina si tiene vecinos en ambas direcciones
     }
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
@@ -359,159 +524,16 @@ public class Generator2D_1 : MonoBehaviour
 
     void PlaceRoom(Vector2Int location, Vector2Int size)
     {
-        for (int x = 0; x < size.x; x++)
-        {
-            for (int y = 0; y < size.y; y++)
-            {
-                Vector3 position = new Vector3(location.x + x, 0, location.y + y);
-                Instantiate(floorTilePrefab, position, Quaternion.identity);
-
-                // Colocar paredes y puertas
-                if (x == 0)
-                {
-                    Vector2Int wallPos = new Vector2Int(location.x + x, location.y + y);
-                    TryPlaceDoor(wallPos, Vector2Int.left); // Verificar puerta
-                    if (grid[wallPos + Vector2Int.left] != CellType.Hallway)
-                        PlaceWall(position + Vector3.left, true); // Pared izquierda
-                }
-                if (x == size.x - 1)
-                {
-                    Vector2Int wallPos = new Vector2Int(location.x + x, location.y + y);
-                    TryPlaceDoor(wallPos, Vector2Int.right); // Verificar puerta
-                    if (grid[wallPos + Vector2Int.right] != CellType.Hallway)
-                        PlaceWall(position + Vector3.right, true); // Pared derecha
-                }
-                if (y == 0)
-                {
-                    Vector2Int wallPos = new Vector2Int(location.x + x, location.y + y);
-                    TryPlaceDoor(wallPos, Vector2Int.down); // Verificar puerta
-                    if (grid[wallPos + Vector2Int.down] != CellType.Hallway)
-                        PlaceWall(position + Vector3.back, false); // Pared trasera
-                }
-                if (y == size.y - 1)
-                {
-                    Vector2Int wallPos = new Vector2Int(location.x + x, location.y + y);
-                    TryPlaceDoor(wallPos, Vector2Int.up); // Verificar puerta
-                    if (grid[wallPos + Vector2Int.up] != CellType.Hallway)
-                        PlaceWall(position + Vector3.forward, false); // Pared frontal
-                }
-            }
-        }
+        PlaceCube(location, size, redMaterial);
     }
 
-    //void PlaceHallway(Vector2Int location)
-    //{
-    //    Vector3 position = new Vector3(location.x, 0, location.y);
-    //    Instantiate(floorTilePrefab, position, Quaternion.identity);
-
-    //    // Opcional: Agregar paredes laterales
-    //    if (grid[location.x - 1, location.y] != CellType.Hallway)
-    //    {
-    //        // Pared izquierda (vertical)
-    //        Instantiate(wallPrefab, position + Vector3.left, Quaternion.Euler(0, 90, 0));
-    //    }
-    //    if (grid[location.x + 1, location.y] != CellType.Hallway)
-    //    {
-    //        // Pared derecha (vertical)
-    //        Instantiate(wallPrefab, position + Vector3.right, Quaternion.Euler(0, 90, 0));
-    //    }
-    //    if (grid[location.x, location.y - 1] != CellType.Hallway)
-    //    {
-    //        // Pared trasera (horizontal)
-    //        Instantiate(wallPrefab, position + Vector3.back, Quaternion.identity);
-    //    }
-    //    if (grid[location.x, location.y + 1] != CellType.Hallway)
-    //    {
-    //        // Pared frontal (horizontal)
-    //        Instantiate(wallPrefab, position + Vector3.forward, Quaternion.identity);
-    //    }
-    //}
     void PlaceHallway(Vector2Int location)
     {
-        Vector3 position = new Vector3(location.x, 0, location.y);
-        Instantiate(floorTilePrefab, position, Quaternion.identity);
-
-        // Reglas para colocar paredes laterales.
-        if (IsWallRequired(location + Vector2Int.left))
-        {
-            // Pared izquierda (vertical)
-            Instantiate(wallPrefab, position + Vector3.left, Quaternion.Euler(0, 90, 0));
-        }
-        if (IsWallRequired(location + Vector2Int.right))
-        {
-            // Pared derecha (vertical)
-            Instantiate(wallPrefab, position + Vector3.right, Quaternion.Euler(0, 90, 0));
-        }
-        if (IsWallRequired(location + Vector2Int.down))
-        {
-            // Pared trasera (horizontal)
-            Instantiate(wallPrefab, position + Vector3.back, Quaternion.identity);
-        }
-        if (IsWallRequired(location + Vector2Int.up))
-        {
-            // Pared frontal (horizontal)
-            Instantiate(wallPrefab, position + Vector3.forward, Quaternion.identity);
-        }
+        PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
     }
 
-    bool IsWallRequired(Vector2Int adjacent)
+    void PlaceDoor(Vector2Int location)
     {
-        // Asegúrate de que las coordenadas estén dentro de los límites del grid.
-        if (adjacent.x < 0 || adjacent.x >= size.x || adjacent.y < 0 || adjacent.y >= size.y)
-        {
-            return false;
-        }
-
-        // No colocar paredes si la celda adyacente es parte de un pasillo o una sala.
-        if (grid[adjacent] == CellType.Hallway || grid[adjacent] == CellType.Room)
-        {
-            return false;
-        }
-
-        return true; // Se requiere una pared si no es transitable.
+        PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
     }
-
-    void PlaceWall(Vector3 position, bool isVertical)
-    {
-        // Si es vertical, rota la pared 90 grados en el eje Y
-        Quaternion rotation = isVertical ? Quaternion.Euler(0, 90, 0) : Quaternion.identity;
-
-        // Instancia la pared
-        Instantiate(wallPrefab, position, rotation);
-    }
-
-    void PlaceDoor(Vector3 position, bool isVertical)
-    {
-        // Si es una puerta vertical, rotarla 90 grados en el eje Y
-        Quaternion rotation = isVertical ? Quaternion.Euler(0, 90, 0) : Quaternion.identity;
-
-        // Instancia la puerta
-        //Instantiate(doorPrefab, position, rotation);
-    }
-
-
-
-    void AddDecorations(Vector3 position)
-    {
-        if (UnityEngine.Random.value > 0.7f)
-        { // 30% probabilidad
-            Instantiate(pillarPrefab, position + Vector3.up, Quaternion.identity);
-        }
-
-        if (UnityEngine.Random.value > 0.9f)
-        { // 10% probabilidad
-            Instantiate(lampPrefab, position + Vector3.up * 2, Quaternion.identity);
-        }
-    }
-
-
-    //void PlaceRoom(Vector2Int location, Vector2Int size)
-    //{
-    //    PlaceCube(location, size, redMaterial);
-    //}
-
-    //void PlaceHallway(Vector2Int location)
-    //{
-    //    PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
-    //}
 }

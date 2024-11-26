@@ -3,7 +3,7 @@ using Graphs;
 using UnityEngine;
 using Random = System.Random;
 
-public class Generator2D : MonoBehaviour
+public class Generator2D_1 : MonoBehaviour
 {
     enum CellType
     {

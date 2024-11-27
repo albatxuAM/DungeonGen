@@ -427,28 +427,45 @@ public class Generator2D : MonoBehaviour
             // Coloca una pared si la celda vacía está adyacente a una habitación o pasillo
             bool adjacentToContent = false;
 
+            //foreach (var neighbor in GetNeighbors(pos))
+            //{
+            //    //if (grid[neighbor] == CellType.Room || grid[neighbor] == CellType.Hallway)
+            //    if (grid[neighbor] != CellType.None)
+            //    {
+            //        adjacentToContent = true;
+            //        break;
+            //    }
+            //}
+
+            //if (adjacentToContent)
+            //{
+            // Coloca la pared orientada hacia la celda ocupada más cercana
             foreach (var neighbor in GetNeighbors(pos))
             {
-                if (grid[neighbor] == CellType.Room || grid[neighbor] == CellType.Hallway)
+                if (grid[neighbor] != CellType.None)
                 {
-                    adjacentToContent = true;
-                    break;
+                    Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
+                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation);
                 }
             }
+            //}
+        }
 
-            if (adjacentToContent)
+        if (grid[pos] == CellType.Hallway)
+        {
+
+            // Coloca la pared orientada hacia la celda ocupada más cercana
+            foreach (var neighbor in GetNeighbors(pos))
             {
-                // Coloca la pared orientada hacia la celda ocupada más cercana
-                foreach (var neighbor in GetNeighbors(pos))
+                if (grid[neighbor] == CellType.Room)
                 {
-                    if (grid[neighbor] != CellType.None)
-                    {
-                        Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
-                        Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+                    Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
+                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-                        Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation);
-                        break;
-                    }
+                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation);
+                    break;
                 }
             }
         }
@@ -473,79 +490,68 @@ public class Generator2D : MonoBehaviour
 
     void PlacePillars(Vector2Int pos)
     {
-        if (grid[pos] == CellType.None)
-        {
-            int adjacentCount = 0;
+        //if (grid[pos] == CellType.None)
+        //{
+        //    int adjacentCount = 0;
+        //    List<Vector2Int> neighborsWithHall = new List<Vector2Int>();
 
-            foreach (var neighbor in GetNeighbors(pos))
-            {
-                if (grid[neighbor] != CellType.None)
-                {
-                    adjacentCount++;
-                }
-            }
+        //    foreach (var neighbor in GetNeighbors(pos))
+        //    {
+        //        if (grid[neighbor] == CellType.Hallway)
+        //        {
+        //            adjacentCount++;
+        //        }
+        //    }
 
-            // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
-            if (adjacentCount >= 2)
-            {
+        //    // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
+        //    if (adjacentCount >= 2)
+        //    {
 
-                Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
-            }
-        }
+        //        Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+        //    }
+        //}
 
         if (grid[pos] == CellType.Room)
         {
             int adjacentCount = 0;
+            List<Vector2Int> neighborsWithWalls = new List<Vector2Int>();
 
             foreach (var neighbor in GetNeighbors(pos))
             {
-                if (grid[neighbor] != CellType.None)
+
+                if (grid[neighbor] == CellType.Room)
                 {
                     adjacentCount++;
+                    neighborsWithWalls.Add(neighbor);
                 }
             }
             // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
             if (adjacentCount <= 2)
             {
-                Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+                if (neighborsWithWalls.Count >= 2)
+                {
+                    Vector2Int neighbor1 = neighborsWithWalls[0];
+                    Vector2Int neighbor2 = neighborsWithWalls[1];
+
+                    // Calculamos las direcciones relativas de los vecinos
+                    Vector3 direction1 = new Vector3(neighbor1.x - pos.x, 0, neighbor1.y - pos.y);
+                    Vector3 direction2 = new Vector3(neighbor2.x - pos.x, 0, neighbor2.y - pos.y);
+
+                    // Calculamos la dirección del pilar, que será el promedio de las dos direcciones
+                    Vector3 pilarDirection = (direction1 + direction2).normalized;
+
+                    // Calculamos la posición intermedia entre los dos vecinos para colocar el pilar
+                    Vector3 pillarPos = new Vector3(pos.x - pilarDirection.x * 0.5f, 0, pos.y - pilarDirection.z * 0.5f);
+
+                    // Definimos la rotación del pilar según la dirección
+                    Quaternion rotation = Quaternion.LookRotation(pilarDirection, Vector3.up);
+
+                    // Colocamos el pilar en la posición calculada
+                    Instantiate(pillarPrefab, pillarPos, Quaternion.identity);
+                    //Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+                }
             }
         }
-
-        //if (grid[pos] == CellType.Hallway)
-        //{
-        //    int adjacentCount = 0;
-
-        //    foreach (var neighbor in GetNeighbors(pos))
-        //    {
-        //        if (grid[neighbor] != CellType.None)
-        //        {
-        //            adjacentCount++;
-        //        }
-        //    }
-        //    // Colocar un pilar si es una esquina (dos vecinos perpendiculares)
-        //    if (adjacentCount == 2)
-        //    {
-        //        Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
-        //    }
-        //}
-    }
-
-    bool IsCorner(Vector2Int pos)
-    {
-        // Identificar si la posición actual está en una esquina
-        List<Vector2Int> neighbors = GetNeighbors(pos);
-        int horizontal = 0, vertical = 0;
-
-        foreach (var neighbor in neighbors)
-        {
-            if (grid[neighbor] != CellType.None)
-            {
-                if (neighbor.x != pos.x) horizontal++;
-                if (neighbor.y != pos.y) vertical++;
-            }
-        }
-
-        return horizontal > 0 && vertical > 0; // Esquina si tiene vecinos en ambas direcciones
     }
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)

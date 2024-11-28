@@ -166,6 +166,7 @@ MonoBehaviour:
   doorPrefab: {fileID: 4463566038210007903, guid: fc2e1c5964aaf934b8ada6dc58685780, type: 3}
   pillarPrefab: {fileID: 16038835297913163, guid: ac5871406adca694fa0b705b57be598d, type: 3}
   lampPrefab: {fileID: 8060405944448375545, guid: 7970c12d6b19a504fbc82353b8a43abe, type: 3}
+  purpleMaterial: {fileID: 2100000, guid: ad62d532d4b8e1642ad5f98b775c9530, type: 2}
 --- !u!4 &203877985
 Transform:
   m_ObjectHideFlags: 0

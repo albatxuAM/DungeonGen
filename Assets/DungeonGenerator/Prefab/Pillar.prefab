@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 7186397052036007447}
   - component: {fileID: 7684189352563455182}
   - component: {fileID: 5824083299607317780}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Pillar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7186397052036007447
 Transform:

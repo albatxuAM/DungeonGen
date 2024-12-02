@@ -92,7 +92,6 @@ public class Generator2D : MonoBehaviour
         random = new Random(ramdomSeed);
         grid = new Grid2D<CellType>(size, Vector2Int.zero);
         rooms = new List<Room>();
-
         PlaceRooms();
         Triangulate();
         CreateHallways();
@@ -101,14 +100,16 @@ public class Generator2D : MonoBehaviour
 
         PathfindHallways();
 
-        grid.Print();
-
-        BuildLevel();
-
-        // Dibujar el cuadrado púrpura al final
+        //debug
         DrawSpawnRoom();
 
+        grid.Print();
+
+        //Parte visible
+        BuildLevel();
         PlaceNavMesh();
+
+        //PlaceLights();
     }
 
     private void PlaceNavMesh()
@@ -506,9 +507,6 @@ public class Generator2D : MonoBehaviour
             Vector3 direction = new Vector3(hallwayNeighbor.Value.x - pos.x, 0, hallwayNeighbor.Value.y - pos.y);
             Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-            // Ajusta la rotación si están invertidas (-180 grados)
-            //rotation *= Quaternion.Euler(0, -180, 0);
-
             // Ajusta la posición de la puerta para que esté en el borde
             Vector3 doorPosition = new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f);
 
@@ -524,23 +522,10 @@ public class Generator2D : MonoBehaviour
 
     void PlaceWalls(Vector2Int pos)
     {
+        bool isAtMapEdge = pos.x == 0 || pos.x == size.x || pos.y == 0 || pos.y == size.y;
+
         if (grid[pos] == CellType.None)
         {
-            // Coloca una pared si la celda vacía está adyacente a una habitación o pasillo
-            bool adjacentToContent = false;
-
-            //foreach (var neighbor in GetNeighbors(pos))
-            //{
-            //    //if (grid[neighbor] == CellType.Room || grid[neighbor] == CellType.Hallway)
-            //    if (grid[neighbor] != CellType.None)
-            //    {
-            //        adjacentToContent = true;
-            //        break;
-            //    }
-            //}
-
-            //if (adjacentToContent)
-            //{
             // Coloca la pared orientada hacia la celda ocupada más cercana
             foreach (var neighbor in GetNeighbors(pos))
             {
@@ -552,7 +537,37 @@ public class Generator2D : MonoBehaviour
                     Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
                 }
             }
-            //}
+            return;
+        }
+
+        if (isAtMapEdge && grid[pos] != CellType.None)
+        {
+            // Determina hacia qué lado del mapa está el borde y coloca la pared en la dirección opuesta
+            Vector3 direction = Vector3.zero;
+
+            // Determina la dirección de la pared según la posición en los bordes
+            if (pos.x == 0) // Borde izquierdo
+            {
+                direction = Vector3.left;
+            }
+            else if (pos.x == size.x - 1) // Borde derecho
+            {
+                direction = Vector3.right;
+            }
+            else if (pos.y == 0) // Borde inferior
+            {
+                direction = Vector3.back;
+            }
+            else if (pos.y == size.y - 1) // Borde superior
+            {
+                direction = Vector3.forward;
+            }
+
+            // Coloca la pared con la dirección opuesta al borde
+            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+            Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
+
+            return;
         }
 
         if (grid[pos] == CellType.Hallway)
@@ -567,9 +582,9 @@ public class Generator2D : MonoBehaviour
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
                     Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
-                    break;
                 }
             }
+            return;
         }
     }
     void PlaceHallwayWalls(Vector2Int pos)

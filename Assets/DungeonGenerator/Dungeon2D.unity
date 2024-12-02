@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0763b230d22fd334bbc9441aed267b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ramdomSeed: 0
+  ramdomSeed: 1
   size: {x: 30, y: 30}
   roomCount: 50
   roomMaxSize: {x: 8, y: 8}
@@ -160,14 +160,14 @@ MonoBehaviour:
   wallPrefab: {fileID: 6229247520373792897, guid: 0570764ed2e6f0a42b95b68ce9b775f1, type: 3}
   doorPrefab: {fileID: 4463566038210007903, guid: fc2e1c5964aaf934b8ada6dc58685780, type: 3}
   pillarPrefab: {fileID: 16038835297913163, guid: ac5871406adca694fa0b705b57be598d, type: 3}
-  lampPrefab: {fileID: 8060405944448375545, guid: 7970c12d6b19a504fbc82353b8a43abe, type: 3}
+  lampPrefab: {fileID: 8060405944448375545, guid: 14194ae18829a7946ae595cd20fd576d, type: 3}
   debug: 0
   cubePrefab: {fileID: 7415050535990569633, guid: 3fb4ddafbd160274ba8f07a1cf8cd5ee, type: 3}
   redMaterial: {fileID: 2100000, guid: 71673d9873285904ab00282788add27f, type: 2}
   blueMaterial: {fileID: 2100000, guid: bd79999920190574a94044b2acad7316, type: 2}
   greenMaterial: {fileID: 2100000, guid: 13cd47135277903479d4b55421faa42e, type: 2}
   purpleMaterial: {fileID: 2100000, guid: ad62d532d4b8e1642ad5f98b775c9530, type: 2}
-  parent: {fileID: 502128166}
+  parent: {fileID: 502128165}
 --- !u!4 &203877985
 Transform:
   m_ObjectHideFlags: 0

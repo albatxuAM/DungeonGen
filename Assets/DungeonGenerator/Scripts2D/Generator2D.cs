@@ -71,7 +71,8 @@ public class Generator2D : MonoBehaviour
     Material purpleMaterial;
 
     [SerializeField]
-    Transform parent;
+    GameObject parent;
+    Transform parentTransform;
 
     Random random;
     Grid2D<CellType> grid;
@@ -82,6 +83,7 @@ public class Generator2D : MonoBehaviour
 
     void Start()
     {
+        parentTransform = parent.transform;
         Generate();
     }
 
@@ -111,11 +113,22 @@ public class Generator2D : MonoBehaviour
 
     private void PlaceNavMesh()
     {
+        // Add a NavMeshSurface component to this GameObject
+        NavMeshSurface navMeshSurface = parent.AddComponent<NavMeshSurface>();
+
+        navMeshSurface.layerMask = LayerMask.GetMask("Floor", "Wall");
+
+        // Bake the NavMesh for this surface
+        navMeshSurface.BuildNavMesh();
+    }
+
+    private void PlaceNavMesh4Room()
+    {
         foreach (var room in rooms)
         {
             // Create an empty GameObject at the room's position
             GameObject roomObj = new GameObject($"NavMesh_{room.bounds.position.x}_{room.bounds.position.y}");
-            roomObj.transform.SetParent(parent);
+            roomObj.transform.SetParent(parentTransform);
 
             // Set the position of the empty GameObject to the center of the room
             roomObj.transform.position = new Vector3(room.bounds.x + room.bounds.width / 2, 0, room.bounds.y + room.bounds.height / 2);
@@ -443,13 +456,13 @@ public class Generator2D : MonoBehaviour
             {
                 Vector2Int pos = new Vector2Int(x, y);
 
-                if (/*grid[pos] == CellType.Room ||*/ grid[pos] == CellType.Hallway)
+                if (grid[pos] == CellType.Room || grid[pos] == CellType.Hallway)
                 {
-                    Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity, parent);
+                    Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity, parentTransform);
                 }
                 else if (grid[pos] == CellType.Door)
                 {
-                    //Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity, parent);
+                    Instantiate(floorTilePrefab, new Vector3(x, 0, y), Quaternion.identity, parentTransform);
                     PlaceDoorWithOrientation(pos);
                 }
             }
@@ -500,12 +513,12 @@ public class Generator2D : MonoBehaviour
             Vector3 doorPosition = new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f);
 
             // Instancia la puerta
-            Instantiate(doorPrefab, doorPosition, rotation, parent);
+            Instantiate(doorPrefab, doorPosition, rotation, parentTransform);
         }
         else
         {
             // Si no hay una conexión válida, coloca la puerta sin rotación como fallback
-            Instantiate(doorPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity, parent);
+            Instantiate(doorPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity, parentTransform);
         }
     }
 
@@ -536,7 +549,7 @@ public class Generator2D : MonoBehaviour
                     Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parent);
+                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
                 }
             }
             //}
@@ -553,7 +566,7 @@ public class Generator2D : MonoBehaviour
                     Vector3 direction = new Vector3(neighbor.x - pos.x, 0, neighbor.y - pos.y);
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parent);
+                    Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
                     break;
                 }
             }
@@ -571,7 +584,7 @@ public class Generator2D : MonoBehaviour
                     Vector3 direction = new Vector3(pos.x - neighbor.x, 0, pos.y - neighbor.y);
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-                    Instantiate(wallPrefab, new Vector3(neighbor.x, 0, neighbor.y), rotation, parent);
+                    Instantiate(wallPrefab, new Vector3(neighbor.x, 0, neighbor.y), rotation, parentTransform);
                 }
             }
         }
@@ -635,7 +648,7 @@ public class Generator2D : MonoBehaviour
                     Quaternion rotation = Quaternion.LookRotation(pilarDirection, Vector3.up);
 
                     // Colocamos el pilar en la posición calculada
-                    Instantiate(pillarPrefab, pillarPos, Quaternion.identity, parent);
+                    Instantiate(pillarPrefab, pillarPos, Quaternion.identity, parentTransform);
                     //Instantiate(pillarPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
                 }
             }

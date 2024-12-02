@@ -70,8 +70,7 @@ public class Generator2D : MonoBehaviour
     [SerializeField]
     Material purpleMaterial;
 
-    [SerializeField]
-    GameObject parent;
+    GameObject mapObject;
     Transform parentTransform;
 
     Random random;
@@ -83,7 +82,12 @@ public class Generator2D : MonoBehaviour
 
     void Start()
     {
-        parentTransform = parent.transform;
+        // Create the empty GameObject with the name "map_seedNum"
+        mapObject = new GameObject("map_" + ramdomSeed);
+
+        parentTransform = mapObject.transform;
+
+        // Optionally, you can call a method to generate the map (if needed)
         Generate();
     }
 
@@ -115,7 +119,7 @@ public class Generator2D : MonoBehaviour
     private void PlaceNavMesh()
     {
         // Add a NavMeshSurface component to this GameObject
-        NavMeshSurface navMeshSurface = parent.AddComponent<NavMeshSurface>();
+        NavMeshSurface navMeshSurface = mapObject.AddComponent<NavMeshSurface>();
 
         navMeshSurface.layerMask = LayerMask.GetMask("Floor", "Wall");
 
@@ -535,6 +539,11 @@ public class Generator2D : MonoBehaviour
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
                     Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
+
+                    if (pos.x % 2 == 0)
+                        Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
+                    else if (pos.y % 2 == 0)
+                        Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
                 }
             }
             return;
@@ -567,6 +576,11 @@ public class Generator2D : MonoBehaviour
             Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
             Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
 
+            if (pos.x % 2 == 0)
+                Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
+            else if (pos.y % 2 == 0)
+                Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
+
             return;
         }
 
@@ -582,6 +596,11 @@ public class Generator2D : MonoBehaviour
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
 
                     Instantiate(wallPrefab, new Vector3(pos.x + direction.x * 0.5f, 0, pos.y + direction.z * 0.5f), rotation, parentTransform);
+
+                    if (pos.x % 2 == 0)
+                        Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
+                    else if (pos.y % 2 == 0)
+                        Instantiate(lampPrefab, new Vector3(pos.x + direction.x * 0.5f, 1, pos.y + direction.z * 0.5f), rotation, parentTransform);
                 }
             }
             return;

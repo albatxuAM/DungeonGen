@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6733814216068999614}
   - component: {fileID: 3476480332819734364}
   m_Layer: 0
-  m_Name: Area Light
+  m_Name: Point  Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 1617164988523401101}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.3413, z: -0}
+  m_LocalPosition: {x: 0, y: -0.344, z: -0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -41,11 +41,11 @@ Light:
   m_GameObject: {fileID: 1617164988523401101}
   m_Enabled: 1
   serializedVersion: 10
-  m_Type: 3
+  m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.30526868, g: 0.61819994, b: 0.9245283, a: 1}
+  m_Color: {r: 0.9811321, g: 0.9283791, b: 0.50445, a: 1}
   m_Intensity: 1
-  m_Range: 10
+  m_Range: 5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
